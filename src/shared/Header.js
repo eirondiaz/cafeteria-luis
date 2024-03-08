@@ -41,6 +41,34 @@ const Header = ({ option, setOption }) => {
         >
           Tipos de usuarios
         </Button>
+        <Button
+          sx={{ ml: 2 }}
+          onClick={() => setOption('user')}
+          variant={option === 'user' ? 'contained' : 'outlined'}
+        >
+          Usuarios
+        </Button>
+        <Button
+          sx={{ ml: 2 }}
+          onClick={() => setOption('brand')}
+          variant={option === 'brand' ? 'contained' : 'outlined'}
+        >
+          Marcas
+        </Button>
+        <Button
+          sx={{ ml: 2 }}
+          onClick={() => setOption('item')}
+          variant={option === 'item' ? 'contained' : 'outlined'}
+        >
+          Articulos
+        </Button>
+        <Button
+          sx={{ ml: 2 }}
+          onClick={() => setOption('employee')}
+          variant={option === 'employee' ? 'contained' : 'outlined'}
+        >
+          Empleados
+        </Button>
       </Box>
     </Box>
   )
