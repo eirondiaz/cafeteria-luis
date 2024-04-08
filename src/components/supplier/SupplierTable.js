@@ -86,6 +86,7 @@ const SupplierTable = ({
           <TableHead>
             <TableRow>
               <TableCell>Nombre Comercial</TableCell>
+              <TableCell>RNC</TableCell>
               <TableCell align="right">Acciones</TableCell>
             </TableRow>
           </TableHead>
@@ -97,6 +98,9 @@ const SupplierTable = ({
               >
                 <TableCell component="th" scope="row">
                   {row.comercialName}
+                </TableCell>
+                <TableCell component="th" scope="row">
+                  {row.rnc}
                 </TableCell>
                 <TableCell align="right">
                   <>

@@ -71,6 +71,15 @@ const SupplierForm = ({
           defaultValue={data?.comercialName || ''}
           onChange={handleChange}
         />
+        <TextField
+          required
+          sx={{ width: '100%', mt: 2 }}
+          name="rnc"
+          label="RNC"
+          variant="outlined"
+          defaultValue={data?.rnc || ''}
+          onChange={handleChange}
+        />
       </Box>
       <Button onClick={onSubmit} sx={{ mt: 4 }} variant="contained">
         {isEditing ? 'Editar' : 'Agregar'}
