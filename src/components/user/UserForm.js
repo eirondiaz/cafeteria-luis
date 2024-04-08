@@ -8,10 +8,18 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import React, { useState } from 'react'
+import axios from 'axios'
+import React, { useState, useEffect } from 'react'
 
-const UserForm = ({ element = {}, isEditing = false }) => {
+const UserForm = ({
+  element = {},
+  isEditing = false,
+  setIsEditing,
+  setRefresh,
+  setOpen,
+}) => {
   const [data, setData] = useState(element)
+  const [userTypeList, setUserTypeList] = useState([])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -22,9 +30,56 @@ const UserForm = ({ element = {}, isEditing = false }) => {
     }))
   }
 
-  const onSubmit = () => {
-    console.log(data)
+  const onSubmit = async () => {
+    isEditing ? update() : create()
   }
+
+  const create = async () => {
+    try {
+      await axios.post(
+        'https://open-source-cafeteria-api-luis.onrender.com/api/users',
+        data
+      )
+      setRefresh((prevVal) => !prevVal)
+      setOpen(false)
+    } catch (error) {
+      console.log(error.stack)
+    } finally {
+      setIsEditing(false)
+      //setIsLoading(false)
+    }
+  }
+
+  const update = async () => {
+    try {
+      await axios.put(
+        `https://open-source-cafeteria-api-luis.onrender.com/api/users/${data.id}`,
+        data
+      )
+      setRefresh((prevVal) => !prevVal)
+      setOpen(false)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setIsEditing(false)
+      //setIsLoading(false)
+    }
+  }
+
+  const getUserTypes = async () => {
+    try {
+      const res = await axios.get(
+        'https://open-source-cafeteria-api-luis.onrender.com/api/user-types'
+      )
+      setUserTypeList(res.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    getUserTypes()
+  }, [])
 
   return (
     <Box>
@@ -54,14 +109,16 @@ const UserForm = ({ element = {}, isEditing = false }) => {
           <InputLabel id="demo-simple-select-label">Tipo de usuario</InputLabel>
           <Select
             required
-            defaultValue={data?.userType?.id || ''}
-            name={'userType'}
+            defaultValue={data?.userTypeId?.id || ''}
+            name={'userTypeId'}
             label="Tipo de usuario"
             onChange={handleChange}
           >
-            <MenuItem value={10}>Ten</MenuItem>
-            <MenuItem value={20}>Twenty</MenuItem>
-            <MenuItem value={30}>Thirty</MenuItem>
+            {userTypeList.map((x) => (
+              <MenuItem key={x.id} value={x.id}>
+                {x.description}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
         <TextField

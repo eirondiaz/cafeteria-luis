@@ -1,7 +1,14 @@
 import { Box, Button, TextField, Typography } from '@mui/material'
+import axios from 'axios'
 import React, { useState } from 'react'
 
-const BrandForm = ({ element = {}, isEditing = false }) => {
+const BrandForm = ({
+  element = {},
+  isEditing = false,
+  setIsEditing,
+  setRefresh,
+  setOpen,
+}) => {
   const [data, setData] = useState(element)
 
   const handleChange = (e) => {
@@ -13,8 +20,40 @@ const BrandForm = ({ element = {}, isEditing = false }) => {
     }))
   }
 
-  const onSubmit = () => {
-    console.log(data)
+  const onSubmit = async () => {
+    isEditing ? update() : create()
+  }
+
+  const create = async () => {
+    try {
+      await axios.post(
+        'https://open-source-cafeteria-api-luis.onrender.com/api/brands',
+        data
+      )
+      setRefresh((prevVal) => !prevVal)
+      setOpen(false)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setIsEditing(false)
+      //setIsLoading(false)
+    }
+  }
+
+  const update = async () => {
+    try {
+      await axios.put(
+        `https://open-source-cafeteria-api-luis.onrender.com/api/brands/${data.id}`,
+        data
+      )
+      setRefresh((prevVal) => !prevVal)
+      setOpen(false)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setIsEditing(false)
+      //setIsLoading(false)
+    }
   }
 
   return (

@@ -21,6 +21,7 @@ import Paper from '@mui/material/Paper'
 import { DeleteOutline, EditOutlined } from '@mui/icons-material'
 import CafeteriaForm from './CafeteriaForm'
 import { style } from '../../shared/ModalStyle'
+import axios from 'axios'
 
 const rows = [
   {
@@ -38,11 +39,18 @@ const rows = [
   { description: 'Gingerbread', campus: 10, encargado: 'eiron' },
 ]
 
-const CafeteriaTable = () => {
+const CafeteriaTable = ({
+  data,
+  setRefresh,
+  isEditing,
+  setEditing,
+  setOpenEditForm,
+  openEditFrom,
+}) => {
   const [open, setOpen] = useState(false)
-  const [openEditFrom, setOpenEditForm] = useState(false)
+  //const [openEditFrom, setOpenEditForm] = useState(false)
   const [selected, setSelected] = useState({})
-  const [isEditing, setEditing] = useState(false)
+  //const [isEditing, setEditing] = useState(false)
 
   const handleClickOpen = (row) => {
     setSelected(row)
@@ -62,6 +70,19 @@ const CafeteriaTable = () => {
     setSelected({})
   }
 
+  const onDelete = async () => {
+    try {
+      await axios.delete(
+        `https://open-source-cafeteria-api-luis.onrender.com/api/cafeterias/${selected.id}`
+      )
+      setRefresh((prevVal) => !prevVal)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      handleClose()
+    }
+  }
+
   return (
     <Box>
       <TableContainer sx={{ mt: 6 }} component={Paper}>
@@ -75,7 +96,7 @@ const CafeteriaTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
+            {data.map((row) => (
               <TableRow
                 key={row.description}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -83,7 +104,7 @@ const CafeteriaTable = () => {
                 <TableCell component="th" scope="row">
                   {row.description}
                 </TableCell>
-                <TableCell align="right">{row.campus}</TableCell>
+                <TableCell align="right">{row.campusId.description}</TableCell>
                 <TableCell align="right">{row.encargado}</TableCell>
                 <TableCell align="right">
                   <>
@@ -115,7 +136,13 @@ const CafeteriaTable = () => {
 
       <Modal open={openEditFrom} onClose={handleClose}>
         <Box sx={style}>
-          <CafeteriaForm isEditing={isEditing} element={selected} />
+          <CafeteriaForm
+            setRefresh={setRefresh}
+            setIsEditing={setEditing}
+            isEditing={isEditing}
+            setOpen={setOpenEditForm}
+            element={selected}
+          />
         </Box>
       </Modal>
 
@@ -129,7 +156,7 @@ const CafeteriaTable = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Disagree</Button>
-          <Button onClick={handleClose} autoFocus>
+          <Button onClick={onDelete} autoFocus>
             Agree
           </Button>
         </DialogActions>

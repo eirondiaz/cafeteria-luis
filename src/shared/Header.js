@@ -69,6 +69,13 @@ const Header = ({ option, setOption }) => {
         >
           Empleados
         </Button>
+        <Button
+          sx={{ ml: 2 }}
+          onClick={() => setOption('sale')}
+          variant={option === 'sale' ? 'contained' : 'outlined'}
+        >
+          Ventas
+        </Button>
       </Box>
     </Box>
   )

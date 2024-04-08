@@ -1,7 +1,14 @@
 import { Box, Button, TextField, Typography } from '@mui/material'
+import axios from 'axios'
 import React, { useState } from 'react'
 
-const EmployeeForm = ({ element = {}, isEditing = false }) => {
+const EmployeeForm = ({
+  element = {},
+  isEditing = false,
+  setIsEditing,
+  setRefresh,
+  setOpen,
+}) => {
   const [data, setData] = useState(element)
 
   const handleChange = (e) => {
@@ -13,8 +20,40 @@ const EmployeeForm = ({ element = {}, isEditing = false }) => {
     }))
   }
 
-  const onSubmit = () => {
-    console.log(data)
+  const onSubmit = async () => {
+    isEditing ? update() : create()
+  }
+
+  const create = async () => {
+    try {
+      await axios.post(
+        'https://open-source-cafeteria-api-luis.onrender.com/api/employees',
+        data
+      )
+      setRefresh((prevVal) => !prevVal)
+      setOpen(false)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      //setIsEditing(false)
+      //setIsLoading(false)
+    }
+  }
+
+  const update = async () => {
+    try {
+      await axios.put(
+        `https://open-source-cafeteria-api-luis.onrender.com/api/employees/${data.id}`,
+        data
+      )
+      setRefresh((prevVal) => !prevVal)
+      setOpen(false)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setIsEditing(false)
+      //setIsLoading(false)
+    }
   }
 
   return (
@@ -54,11 +93,11 @@ const EmployeeForm = ({ element = {}, isEditing = false }) => {
         <TextField
           required
           sx={{ width: '100%', mt: 2 }}
-          name="commisionPercentage"
+          name="commissionPercentage"
           type={'number'}
           label="Porciento Comision"
           variant="outlined"
-          defaultValue={data?.commisionPercentage || ''}
+          defaultValue={data?.commissionPercentage || ''}
           onChange={handleChange}
         />
         <TextField

@@ -21,6 +21,7 @@ import {
 import UserTypeForm from './UserTypeForm'
 import React, { useState } from 'react'
 import { style } from '../../shared/ModalStyle'
+import axios from 'axios'
 
 const rows = [
   {
@@ -34,11 +35,18 @@ const rows = [
   { description: 'Gingerbread' },
 ]
 
-const UserTypeTable = () => {
+const UserTypeTable = ({
+  data,
+  setRefresh,
+  isEditing,
+  setEditing,
+  setOpenEditForm,
+  openEditFrom,
+}) => {
   const [open, setOpen] = useState(false)
-  const [openEditFrom, setOpenEditForm] = useState(false)
+  // const [openEditFrom, setOpenEditForm] = useState(false)
   const [selected, setSelected] = useState({})
-  const [isEditing, setEditing] = useState(false)
+  //const [isEditing, setEditing] = useState(false)
 
   const handleClickOpen = (row) => {
     setSelected(row)
@@ -58,6 +66,19 @@ const UserTypeTable = () => {
     setSelected({})
   }
 
+  const onDelete = async () => {
+    try {
+      await axios.delete(
+        `https://open-source-cafeteria-api-luis.onrender.com/api/user-types/${selected.id}`
+      )
+      setRefresh((prevVal) => !prevVal)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      handleClose()
+    }
+  }
+
   return (
     <Box>
       <TableContainer sx={{ mt: 6 }} component={Paper}>
@@ -69,7 +90,7 @@ const UserTypeTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
+            {data.map((row) => (
               <TableRow
                 key={row.description}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -107,7 +128,13 @@ const UserTypeTable = () => {
 
       <Modal open={openEditFrom} onClose={handleClose}>
         <Box sx={style}>
-          <UserTypeForm isEditing={isEditing} element={selected} />
+          <UserTypeForm
+            setRefresh={setRefresh}
+            setIsEditing={setEditing}
+            isEditing={isEditing}
+            setOpen={setOpenEditForm}
+            element={selected}
+          />
         </Box>
       </Modal>
 
@@ -121,7 +148,7 @@ const UserTypeTable = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Disagree</Button>
-          <Button onClick={handleClose} autoFocus>
+          <Button onClick={onDelete} autoFocus>
             Agree
           </Button>
         </DialogActions>

@@ -18,6 +18,7 @@ import {
   TableRow,
   Tooltip,
 } from '@mui/material'
+import axios from 'axios'
 import React, { useState } from 'react'
 import { style } from '../../shared/ModalStyle'
 import ItemForm from './ItemForm'
@@ -60,11 +61,18 @@ const rows = [
   },
 ]
 
-const ItemTable = () => {
+const ItemTable = ({
+  data,
+  setRefresh,
+  isEditing,
+  setEditing,
+  setOpenEditForm,
+  openEditFrom,
+}) => {
   const [open, setOpen] = useState(false)
-  const [openEditFrom, setOpenEditForm] = useState(false)
+  //const [openEditFrom, setOpenEditForm] = useState(false)
   const [selected, setSelected] = useState({})
-  const [isEditing, setEditing] = useState(false)
+  //const [isEditing, setEditing] = useState(false)
 
   const handleClickOpen = (row) => {
     setSelected(row)
@@ -84,6 +92,19 @@ const ItemTable = () => {
     setSelected({})
   }
 
+  const onDelete = async () => {
+    try {
+      await axios.delete(
+        `https://open-source-cafeteria-api-luis.onrender.com/api/items/${selected.id}`
+      )
+      setRefresh((prevVal) => !prevVal)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      handleClose()
+    }
+  }
+
   return (
     <Box>
       <TableContainer sx={{ mt: 6 }} component={Paper}>
@@ -99,7 +120,7 @@ const ItemTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
+            {data.map((row) => (
               <TableRow
                 key={row.description}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -108,13 +129,13 @@ const ItemTable = () => {
                   {row.description}
                 </TableCell>
                 <TableCell component="th" scope="row">
-                  {row.brand.description}
+                  {row.brandId.description}
                 </TableCell>
                 <TableCell component="th" scope="row">
                   {row.cost}
                 </TableCell>
                 <TableCell component="th" scope="row">
-                  {row.supplier.commercialName}
+                  {row.supplierId.comercialName}
                 </TableCell>
                 <TableCell component="th" scope="row">
                   {row.stock}
@@ -149,7 +170,13 @@ const ItemTable = () => {
 
       <Modal open={openEditFrom} onClose={handleClose}>
         <Box sx={style}>
-          <ItemForm isEditing={isEditing} element={selected} />
+          <ItemForm
+            setRefresh={setRefresh}
+            setIsEditing={setEditing}
+            isEditing={isEditing}
+            setOpen={setOpenEditForm}
+            element={selected}
+          />
         </Box>
       </Modal>
 
@@ -163,7 +190,7 @@ const ItemTable = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Disagree</Button>
-          <Button onClick={handleClose} autoFocus>
+          <Button onClick={onDelete} autoFocus>
             Agree
           </Button>
         </DialogActions>

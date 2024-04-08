@@ -18,6 +18,7 @@ import {
   TableRow,
   Tooltip,
 } from '@mui/material'
+import axios from 'axios'
 import React, { useState } from 'react'
 import { style } from '../../shared/ModalStyle'
 import UserForm from './UserForm'
@@ -53,11 +54,18 @@ const rows = [
   },
 ]
 
-const UserTable = () => {
+const UserTable = ({
+  data,
+  setRefresh,
+  isEditing,
+  setEditing,
+  setOpenEditForm,
+  openEditFrom,
+}) => {
   const [open, setOpen] = useState(false)
-  const [openEditFrom, setOpenEditForm] = useState(false)
+  //const [openEditFrom, setOpenEditForm] = useState(false)
   const [selected, setSelected] = useState({})
-  const [isEditing, setEditing] = useState(false)
+  //const [isEditing, setEditing] = useState(false)
 
   const handleClickOpen = (row) => {
     setSelected(row)
@@ -77,6 +85,19 @@ const UserTable = () => {
     setSelected({})
   }
 
+  const onDelete = async () => {
+    try {
+      await axios.delete(
+        `https://open-source-cafeteria-api-luis.onrender.com/api/users/${selected.id}`
+      )
+      setRefresh((prevVal) => !prevVal)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      handleClose()
+    }
+  }
+
   return (
     <Box>
       <TableContainer sx={{ mt: 6 }} component={Paper}>
@@ -92,7 +113,7 @@ const UserTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
+            {data.map((row) => (
               <TableRow
                 key={row.name}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -104,7 +125,7 @@ const UserTable = () => {
                   {row.cedula}
                 </TableCell>
                 <TableCell component="th" scope="row">
-                  {row.userType.description}
+                  {row.userTypeId?.description}
                 </TableCell>
                 <TableCell component="th" scope="row">
                   {row.creditLimit}
@@ -142,7 +163,13 @@ const UserTable = () => {
 
       <Modal open={openEditFrom} onClose={handleClose}>
         <Box sx={style}>
-          <UserForm isEditing={isEditing} element={selected} />
+          <UserForm
+            setRefresh={setRefresh}
+            setIsEditing={setEditing}
+            isEditing={isEditing}
+            setOpen={setOpenEditForm}
+            element={selected}
+          />
         </Box>
       </Modal>
 
@@ -156,7 +183,7 @@ const UserTable = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Disagree</Button>
-          <Button onClick={handleClose} autoFocus>
+          <Button onClick={onDelete} autoFocus>
             Agree
           </Button>
         </DialogActions>

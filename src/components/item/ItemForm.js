@@ -8,10 +8,19 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import React, { useState } from 'react'
+import axios from 'axios'
+import React, { useState, useEffect } from 'react'
 
-const ItemForm = ({ element = {}, isEditing = false }) => {
+const ItemForm = ({
+  element = {},
+  isEditing = false,
+  setIsEditing,
+  setRefresh,
+  setOpen,
+}) => {
   const [data, setData] = useState(element)
+  const [brandList, setBrandList] = useState([])
+  const [supplierList, setSupplierList] = useState([])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -22,9 +31,68 @@ const ItemForm = ({ element = {}, isEditing = false }) => {
     }))
   }
 
-  const onSubmit = () => {
-    console.log(data)
+  const onSubmit = async () => {
+    isEditing ? update() : create()
   }
+
+  const create = async () => {
+    try {
+      await axios.post(
+        'https://open-source-cafeteria-api-luis.onrender.com/api/items',
+        data
+      )
+      setRefresh((prevVal) => !prevVal)
+      setOpen(false)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      //setIsEditing(false)
+      //setIsLoading(false)
+    }
+  }
+
+  const update = async () => {
+    try {
+      await axios.put(
+        `https://open-source-cafeteria-api-luis.onrender.com/api/items/${data.id}`,
+        data
+      )
+      setRefresh((prevVal) => !prevVal)
+      setOpen(false)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setIsEditing(false)
+      //setIsLoading(false)
+    }
+  }
+
+  const getBrands = async () => {
+    try {
+      const res = await axios.get(
+        'https://open-source-cafeteria-api-luis.onrender.com/api/brands'
+      )
+      setBrandList(res.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const getSuppliers = async () => {
+    try {
+      const res = await axios.get(
+        'https://open-source-cafeteria-api-luis.onrender.com/api/suppliers'
+      )
+      setSupplierList(res.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    getBrands()
+    getSuppliers()
+  }, [])
 
   return (
     <Box>
@@ -45,14 +113,16 @@ const ItemForm = ({ element = {}, isEditing = false }) => {
           <InputLabel id="demo-simple-select-label">Marca</InputLabel>
           <Select
             required
-            defaultValue={data?.brand?.id || ''}
-            name={'brand'}
+            defaultValue={data?.brandId?.id || ''}
+            name={'brandId'}
             label="Marca"
             onChange={handleChange}
           >
-            <MenuItem value={10}>Ten</MenuItem>
-            <MenuItem value={20}>Twenty</MenuItem>
-            <MenuItem value={30}>Thirty</MenuItem>
+            {brandList.map((x) => (
+              <MenuItem key={x.id} value={x.id}>
+                {x.description}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
         <TextField
@@ -69,14 +139,16 @@ const ItemForm = ({ element = {}, isEditing = false }) => {
           <InputLabel id="demo-simple-select-label">Proveedor</InputLabel>
           <Select
             required
-            defaultValue={data?.supplier?.id || ''}
-            name={'supplier'}
+            defaultValue={data?.supplierId?.id || ''}
+            name={'supplierId'}
             label="Proveedor"
             onChange={handleChange}
           >
-            <MenuItem value={10}>Ten</MenuItem>
-            <MenuItem value={20}>Twenty</MenuItem>
-            <MenuItem value={30}>Thirty</MenuItem>
+            {supplierList.map((x) => (
+              <MenuItem key={x.id} value={x.id}>
+                {x.comercialName}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
         <TextField

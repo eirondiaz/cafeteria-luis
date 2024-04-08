@@ -18,6 +18,7 @@ import {
   TableRow,
   Tooltip,
 } from '@mui/material'
+import axios from 'axios'
 import React, { useState } from 'react'
 import { style } from '../../shared/ModalStyle'
 import EmployeeForm from './EmployeeForm'
@@ -60,11 +61,18 @@ const rows = [
   },
 ]
 
-const EmployeeTable = () => {
+const EmployeeTable = ({
+  data,
+  setRefresh,
+  isEditing,
+  setEditing,
+  setOpenEditForm,
+  openEditFrom,
+}) => {
   const [open, setOpen] = useState(false)
-  const [openEditFrom, setOpenEditForm] = useState(false)
+  //const [openEditFrom, setOpenEditForm] = useState(false)
   const [selected, setSelected] = useState({})
-  const [isEditing, setEditing] = useState(false)
+  //const [isEditing, setEditing] = useState(false)
 
   const handleClickOpen = (row) => {
     setSelected(row)
@@ -84,6 +92,19 @@ const EmployeeTable = () => {
     setSelected({})
   }
 
+  const onDelete = async () => {
+    try {
+      await axios.delete(
+        `https://open-source-cafeteria-api-luis.onrender.com/api/employees/${selected.id}`
+      )
+      setRefresh((prevVal) => !prevVal)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      handleClose()
+    }
+  }
+
   return (
     <Box>
       <TableContainer sx={{ mt: 6 }} component={Paper}>
@@ -99,7 +120,7 @@ const EmployeeTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
+            {data.map((row) => (
               <TableRow
                 key={row.name}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -114,7 +135,7 @@ const EmployeeTable = () => {
                   {row.workShift}
                 </TableCell>
                 <TableCell component="th" scope="row">
-                  {row.commisionPercentage}
+                  {row.commissionPercentage}
                 </TableCell>
                 <TableCell component="th" scope="row">
                   {row.admissionDate}
@@ -149,7 +170,13 @@ const EmployeeTable = () => {
 
       <Modal open={openEditFrom} onClose={handleClose}>
         <Box sx={style}>
-          <EmployeeForm isEditing={isEditing} element={selected} />
+          <EmployeeForm
+            setRefresh={setRefresh}
+            setIsEditing={setEditing}
+            isEditing={isEditing}
+            setOpen={setOpenEditForm}
+            element={selected}
+          />
         </Box>
       </Modal>
 
@@ -163,7 +190,7 @@ const EmployeeTable = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Disagree</Button>
-          <Button onClick={handleClose} autoFocus>
+          <Button onClick={onDelete} autoFocus>
             Agree
           </Button>
         </DialogActions>

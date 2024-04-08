@@ -5,6 +5,7 @@ import CafeteriaScreen from '../components/cafeteria/CafeteriaScreen'
 import CampusScreen from '../components/campus/CampusScreen'
 import EmployeeScreen from '../components/employee/EmployeeScreen'
 import ItemScreen from '../components/item/ItemScreen'
+import SaleScreen from '../components/sale/SaleScreen'
 import SupplierScreen from '../components/supplier/SupplierScreen'
 import UserTypeScreen from '../components/user-type/UserTypeScreen'
 import UserScreen from '../components/user/UserScreen'
@@ -18,6 +19,7 @@ const OUTLET = {
   brand: <BrandScreen />,
   item: <ItemScreen />,
   employee: <EmployeeScreen />,
+  sale: <SaleScreen />,
 }
 
 const Container = ({ option }) => {

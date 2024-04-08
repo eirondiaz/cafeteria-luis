@@ -8,10 +8,18 @@ import {
   Typography,
 } from '@mui/material'
 import { Box } from '@mui/system'
-import React, { useState } from 'react'
+import axios from 'axios'
+import React, { useState, useEffect } from 'react'
 
-const CafeteriaForm = ({ element = {}, isEditing = false }) => {
+const CafeteriaForm = ({
+  element = {},
+  isEditing = false,
+  setIsEditing,
+  setRefresh,
+  setOpen,
+}) => {
   const [data, setData] = useState(element)
+  const [campusList, setCampusList] = useState([])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -22,9 +30,56 @@ const CafeteriaForm = ({ element = {}, isEditing = false }) => {
     }))
   }
 
-  const onSubmit = () => {
-    console.log(data)
+  const onSubmit = async () => {
+    isEditing ? update() : create()
   }
+
+  const getCampus = async () => {
+    try {
+      const res = await axios.get(
+        'https://open-source-cafeteria-api-luis.onrender.com/api/campus'
+      )
+      setCampusList(res.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const create = async () => {
+    try {
+      await axios.post(
+        'https://open-source-cafeteria-api-luis.onrender.com/api/cafeterias',
+        data
+      )
+      setRefresh((prevVal) => !prevVal)
+      setOpen(false)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setIsEditing(false)
+      //setIsLoading(false)
+    }
+  }
+
+  const update = async () => {
+    try {
+      await axios.put(
+        `https://open-source-cafeteria-api-luis.onrender.com/api/cafeterias/${data.id}`,
+        data
+      )
+      setRefresh((prevVal) => !prevVal)
+      setOpen(false)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setIsEditing(false)
+      //setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    getCampus()
+  }, [])
 
   return (
     <Box>
@@ -45,14 +100,16 @@ const CafeteriaForm = ({ element = {}, isEditing = false }) => {
           <InputLabel id="demo-simple-select-label">Campus</InputLabel>
           <Select
             required
-            defaultValue={data?.campus || ''}
-            name={'campus'}
-            label="Age"
+            defaultValue={data?.campusId || ''}
+            name={'campusId'}
+            label="Campus"
             onChange={handleChange}
           >
-            <MenuItem value={10}>Ten</MenuItem>
-            <MenuItem value={20}>Twenty</MenuItem>
-            <MenuItem value={30}>Thirty</MenuItem>
+            {campusList.map((x) => (
+              <MenuItem key={x.id} value={x.Id}>
+                {x.description}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
         <TextField
