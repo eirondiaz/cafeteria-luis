@@ -173,7 +173,7 @@ const SaleForm = ({
         <TextField
           required
           sx={{ width: '100%', mt: 2 }}
-          name="stock"
+          name="units"
           type={'number'}
           label="Unidades Vendidas"
           variant="outlined"
